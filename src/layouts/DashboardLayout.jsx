@@ -22,9 +22,9 @@ const DashboardLayout = () => {
   const toggle = () => setCollapsed(!collapsed);
 
   const menuItems = [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
+    // { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
     { key: '/products', icon: <ShoppingCartOutlined />, label: 'Products' },
-    { key: '/orders', icon: <ShoppingCartOutlined />, label: 'Orders' },
+    // { key: '/orders', icon: <ShoppingCartOutlined />, label: 'Orders' },
   ];
 
   const handleMenuClick = (e) => {
@@ -35,7 +35,20 @@ const DashboardLayout = () => {
     <>
       <CustomNotification />
       <Layout style={{ minHeight: '100vh' }}>
-        <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}>
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={setCollapsed}
+          style={{
+            height: '100vh', // Full height
+            position: 'fixed', // Fix it in place
+            top: 0, // Align to top
+            left: 0, // Align to the left side of the viewport
+            overflowY: 'auto', // Make the content scrollable
+            width: collapsed ? 80 : 200, // Change width based on collapsed state
+            zIndex: 100, // Ensure sidebar stays on top
+          }}
+        >
           <div className="logo" style={{ color: 'white', margin: '16px', textAlign: 'center' }}>
             {collapsed ? 'AD' : 'Admin Portal'}
           </div>
@@ -51,7 +64,9 @@ const DashboardLayout = () => {
             }))}
           />
         </Sider>
-        <Layout className="site-layout">
+
+        <Layout className="site-layout" style={{ marginLeft: collapsed ? 80 : 200 }}>
+          {/* Adding marginLeft to offset the fixed sidebar */}
           <Header
             style={{
               padding: '0 16px',
@@ -59,6 +74,9 @@ const DashboardLayout = () => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
+              position: 'sticky', // Make the header sticky
+              top: 0, // Stick to top
+              zIndex: 1000, // Ensure header stays on top of content
             }}
           >
             <Button type="text" onClick={toggle}>
@@ -68,6 +86,7 @@ const DashboardLayout = () => {
               Logout
             </Button>
           </Header>
+
           <Content style={{ margin: '16px' }}>
             <div style={{ padding: 24, minHeight: 360, background: '#fff' }}>
               <Outlet />

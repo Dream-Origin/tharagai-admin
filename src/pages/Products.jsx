@@ -35,13 +35,9 @@ import { csvToArray } from '../utils/helpers';
 const { TextArea } = Input;
 
 const booleanAttributes = [
-    'budget',
-    'premium',
-    'exclusive',
-    'handpicked',
-    'bestSeller',
-    'unique',
-    'newArrival',
+   {label:"Exclusive", value:'exclusive'},
+   {label:"Best Seller", value:'bestSeller'},
+   {label:"New Arrival", value:'newArrival'},
 ];
 
 const initialFormState = {
@@ -49,12 +45,9 @@ const initialFormState = {
     title: '',
     category: 'Women',
     subCategory: '',
-    budget: false,
-    premium: false,
+    
     exclusive: false,
-    handpicked: false,
     bestSeller: false,
-    unique: false,
     newArrival: false,
     price: null,
     originalPrice: null,
@@ -233,8 +226,8 @@ export default function ProductsPage() {
                             <Row>
                                 {booleanAttributes.map((attr) => (
                                     <Col xs={12} sm={8} md={4} key={attr}>
-                                        <Form.Item name={attr} valuePropName="checked" noStyle>
-                                            <Checkbox style={{ marginBottom: 10 }}>{attr}</Checkbox>
+                                        <Form.Item name={attr.value} valuePropName="checked" noStyle>
+                                            <Checkbox style={{ marginBottom: 10 }}>{attr.label}</Checkbox>
                                         </Form.Item>
                                     </Col>
                                 ))}

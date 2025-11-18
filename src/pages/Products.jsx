@@ -75,6 +75,7 @@ export default function ProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const itemsPerPage = 6;
   const [productId, setProductId] = useState();
+  const [mongoId, setMongoId] = useState();
 
   useEffect(() => {
     setProductId(getProductId());
@@ -103,13 +104,16 @@ export default function ProductsPage() {
       colors: product.colors?.join(", "),
       tags: product.tags?.join(", "),
     });
+    setMongoId(product._id)
     setProductId(product.productId);
   };
 
   const handleCancel = () => {
     form.resetFields();
+    setMongoId(null)
     setUploadedImages([]);
     setEditing(false);
+    loadProducts();
   };
 
   const handleDelete = async (id) => {
@@ -133,7 +137,7 @@ export default function ProductsPage() {
     };
     try {
       if (editing) {
-        await updateProduct(productData);
+        await updateProduct({...productData, _id: mongoId});
       } else {
         await saveProduct(productData);
       }
@@ -556,10 +560,10 @@ export default function ProductsPage() {
               <strong>Stock:</strong> {selectedProduct.stock}
             </Typography.Paragraph>
             <Typography.Paragraph>
-              <strong>Sizes:</strong> {selectedProduct.sizes.join(', ')}
+              <strong>Sizes:</strong> {selectedProduct.sizes.join(", ")}
             </Typography.Paragraph>
             <Typography.Paragraph>
-              <strong>Colors:</strong> {selectedProduct.colors.join(', ')}
+              <strong>Colors:</strong> {selectedProduct.colors.join(", ")}
             </Typography.Paragraph>
             <Typography.Paragraph>
               <strong>Description:</strong> {selectedProduct.description || "-"}

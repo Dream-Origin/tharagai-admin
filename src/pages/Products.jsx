@@ -298,34 +298,35 @@ export default function ProductsPage() {
             </Col>
 
             {/* Numbers */}
-            <Col xs={12} md={6}>
+            
+            <Col xs={12} md={8}>
               <Form.Item
-                label="Price"
-                name="price"
-                rules={[{ required: true }]}
-              >
-                <InputNumber min={0} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col xs={12} md={6}>
-              <Form.Item
-                label="Original Price"
+                label="Actual Price"
                 name="originalPrice"
                 rules={[{ required: true }]}
               >
                 <InputNumber min={0} style={{ width: "100%" }} />
               </Form.Item>
             </Col>
-            <Col xs={12} md={6}>
+            <Col xs={12} md={8}>
               <Form.Item
+                label="Selling Price"
+                name="price"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            {/* <Col xs={12} md={6}>
+               <Form.Item
                 label="Discount %"
                 name="discountPercentage"
                 rules={[{ required: true }]}
               >
                 <InputNumber min={0} max={100} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col xs={12} md={6}>
+              </Form.Item>  
+            </Col> */}
+            <Col xs={12} md={8}>
               <Form.Item
                 label="Stock"
                 name="stock"

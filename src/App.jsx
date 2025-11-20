@@ -5,6 +5,7 @@ import DashboardLayout from './layouts/DashboardLayout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 // import OrdersPage from './pages/OrdersPage.jsx';
 import Products from './pages/Products.jsx';
+import './App.css';
 
 const App = () => {
   return (

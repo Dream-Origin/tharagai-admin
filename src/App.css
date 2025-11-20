@@ -1,42 +1,62 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+*{
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* FORM ITEM LABEL */
+.ant-form-item-label > label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* INPUT & SELECT COMMON STYLES */
+.ant-input,
+.ant-input-number,
+.ant-select-selector {
+    border-radius: 2px !important;
+    border: 1px solid #d9d9d9 !important;
+    padding: 6px 12px !important;
+    transition: all 0.25s ease !important;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* FOCUS EFFECT */
+.ant-input:focus,
+.ant-input:hover,
+.ant-select-selector:hover,
+.ant-select-focused .ant-select-selector {
+    border-color: #7c5dfa !important;       /* purple highlight */
+    box-shadow: 0 0 6px rgba(124, 93, 250, 0.3) !important;
 }
 
-.card {
-  padding: 2em;
+/* SELECT DROPDOWN */
+.ant-select-dropdown {
+    border-radius: 2px !important;
+    padding: 6px !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12) !important;
 }
 
-.read-the-docs {
-  color: #888;
+/* CHECKBOX STYLE */
+.ant-checkbox-inner {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 2px !important;
+}
+
+/* Checkbox checked color */
+.ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #7c5dfa !important;
+    border-color: #7c5dfa !important;
+}
+
+/* Checkbox hover */
+.ant-checkbox-wrapper:hover .ant-checkbox-inner {
+    border-color: #7c5dfa !important;
+}
+
+/* SMOOTH TRANSITIONS */
+.ant-checkbox-inner,
+.ant-input,
+.ant-select-selector {
+    transition: all 0.2s ease !important;
 }

@@ -6,7 +6,6 @@ import {
     Badge,
     Button,
     Typography,
-    Pagination,
     Spin,
     Form,
     Input,
@@ -17,6 +16,9 @@ import {
     Space,
     Modal,
     Image,
+    Table,
+    Tag,
+    Pagination,
 } from "antd";
 import {
     UploadOutlined,
@@ -46,7 +48,6 @@ const initialFormState = {
     title: "",
     category: "Women",
     subCategory: "",
-
     exclusive: false,
     bestSeller: false,
     newArrival: false,
@@ -58,7 +59,7 @@ const initialFormState = {
     sizes: null,
     colors: "",
     material: "",
-    fabric: "",
+    fabric: null,
     description: "",
     details: "",
     tags: "",
@@ -76,6 +77,9 @@ export default function ProductsPage() {
     const itemsPerPage = 6;
     const [productId, setProductId] = useState();
     const [mongoId, setMongoId] = useState();
+    const [searchTitle, setSearchTitle] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState("Women");
+    const [searchProductId, setSearchProductId] = useState("");
 
     useEffect(() => {
         setProductId(getProductId());
@@ -87,8 +91,8 @@ export default function ProductsPage() {
         try {
             const data = await fetchProducts();
             setProducts(Array.isArray(data) ? data : []);
-            const productId = data.at(-1)?.productId;
-            setProductId(getProductId(productId));
+            const lastId = data.at(-1)?.productId;
+            setProductId(getProductId(lastId));
         } catch (err) {
             console.error(err);
         } finally {
@@ -101,16 +105,21 @@ export default function ProductsPage() {
         setUploadedImages(product.images || []);
         form.setFieldsValue({
             ...product,
-            colors: product.colors?.join(", "),
-            tags: product.tags?.join(", "),
+            colors: product.colors?.join(","),
+            tags: product.tags?.join(","),
         });
-        setMongoId(product._id)
+        setMongoId(product._id);
         setProductId(product.productId);
+        // Scroll to top
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth", // smooth scrolling
+        });
     };
 
     const handleCancel = () => {
         form.resetFields();
-        setMongoId(null)
+        setMongoId(null);
         setUploadedImages([]);
         setEditing(false);
         loadProducts();
@@ -130,6 +139,7 @@ export default function ProductsPage() {
         const productData = {
             ...values,
             productId,
+            fabric: values.fabric ? values.fabric[0] : "",
             sizes: values.sizes,
             colors: csvToArray(values.colors),
             tags: csvToArray(values.tags),
@@ -164,35 +174,132 @@ export default function ProductsPage() {
         }
     };
 
-    const showDetails = (product) => {
-        setSelectedProduct(product);
-        setModalVisible(true);
-    };
-
     const handleModalClose = () => {
         setModalVisible(false);
         setSelectedProduct(null);
     };
 
-    const totalPages = Math.ceil(products.length / itemsPerPage);
-    const paginatedProducts = products.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
     const handlePreview = async (file) => {
         window.open(file.url, "_blank");
     };
 
     const handleRemove = (file) => {
-        setUploadedImages(prev =>
-            prev.filter((img) => img !== file.url)
-        );
+        setUploadedImages((prev) => prev.filter((img) => img !== file.url));
     };
+
+    // Filtered products for search and category filter
+
+
+    const filteredProducts = products
+        .filter((p) =>
+            p.title.toLowerCase().includes(searchTitle.toLowerCase())
+        )
+        .filter((p) => (categoryFilter ? p.category === categoryFilter : true))
+        .filter((p) =>
+            p.productId.toString().includes(searchProductId.toString())
+        );
+
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginatedProducts = filteredProducts.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const columns = [
+        {
+            title: "Image",
+            dataIndex: "images",
+            key: "images",
+            render: (images) => (
+                <img
+                    src={images?.[0]}
+                    alt="product"
+                    style={{
+                        width: 70,
+                        height: 70,
+                        borderRadius: 8,
+                        objectFit: "cover",
+                        border: "1px solid #f0f0f0",
+                    }}
+                />
+            ),
+        },
+        {
+            title: "Product",
+            dataIndex: "title",
+            key: "title",
+            sorter: (a, b) => a.title.localeCompare(b.title),
+            render: (text, record) => (
+                <div>
+                    <Typography.Text strong>{record.title}</Typography.Text>
+                    <br />
+                    <Typography.Text type="secondary">{record.category}</Typography.Text>
+                </div>
+            ),
+        },
+        {
+            title: "Price",
+            dataIndex: "price",
+            key: "price",
+            sorter: (a, b) => a.price - b.price,
+            render: (price) => <Typography.Text strong>₹{price}</Typography.Text>,
+        },
+        {
+            title: "Stock",
+            dataIndex: "stock",
+            key: "stock",
+            sorter: (a, b) => a.stock - b.stock,
+            render: (stock) =>
+                stock === 0 ? (
+                    <Badge color="red" text="Out of Stock" />
+                ) : (
+                    <Badge color="green" text="In Stock" />
+                ),
+        },
+        {
+            title: "Tag",
+            key: "tag",
+            render: (row) =>
+                row.newArrival ? (
+                    <Tag color="green">New</Tag>
+                ) : row.bestSeller ? (
+                    <Tag color="blue">Best Seller</Tag>
+                ) : (
+                    "-"
+                ),
+        },
+        {
+            title: "Actions",
+            key: "actions",
+            render: (row) => (
+                <Space size="middle">
+                    <Button
+                        size="small"
+                        icon={<InfoCircleOutlined />}
+                        onClick={() => {
+                            setSelectedProduct(row);
+                            setModalVisible(true);
+                        }}
+                    >
+                        Details
+                    </Button>
+                    <EditOutlined
+                        style={{ color: "#1677ff", fontSize: 18, cursor: "pointer" }}
+                        onClick={() => handleEdit(row)}
+                    />
+                    <DeleteOutlined
+                        style={{ color: "#ff4d4f", fontSize: 18, cursor: "pointer" }}
+                        onClick={() => handleDelete(row._id)}
+                    />
+                </Space>
+            ),
+        },
+    ];
 
     return (
         <Spin spinning={loading}>
             <Typography.Title
-                level={2}
+                level={3}
                 style={{ textAlign: "center", marginBottom: 30 }}
             >
                 Product Manager
@@ -257,7 +364,7 @@ export default function ProductsPage() {
                             <label style={{ fontWeight: 600 }}>Attributes</label>
                             <Row>
                                 {booleanAttributes.map((attr) => (
-                                    <Col xs={12} sm={8} md={4} key={attr}>
+                                    <Col xs={24} sm={8} md={4} key={attr}>
                                         <Form.Item
                                             name={attr.value}
                                             valuePropName="checked"
@@ -273,7 +380,7 @@ export default function ProductsPage() {
                         </Col>
 
                         {/* Sizes, Colors, Tags */}
-                        <Col xs={24} md={8}>
+                        <Col xs={24} md={6}>
                             <Form.Item
                                 label="Sizes"
                                 name="sizes"
@@ -295,19 +402,42 @@ export default function ProductsPage() {
                                 />
                             </Form.Item>
                         </Col>
-                        <Col xs={24} md={8}>
+                        <Col xs={24} md={6}>
                             <Form.Item label="Colors" name="colors">
-                                <Input placeholder="Red, Black" />
+                                <Input placeholder="Red" />
                             </Form.Item>
                         </Col>
-                        <Col xs={24} md={8}>
+                        <Col xs={24} md={6}>
                             <Form.Item label="Tags" name="tags">
-                                <Input placeholder="cotton, summer" />
+                                <Input placeholder="New" />
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} md={6}>
+                            <Form.Item
+                                label="Fabric"
+                                name="fabric"
+                                rules={[{ required: false }]}
+                            >
+                                <Select
+                                    mode="tags"
+                                    maxCount={1}          // <-- allows typing custom values
+                                    placeholder="Select or type fabric"
+                                    allowClear
+                                    options={[
+                                        { label: "Cotton", value: "Cotton" },
+                                        { label: "Silk Cotton", value: "Silk Cotton" },
+                                        { label: "Silk", value: "Silk" },
+                                        { label: "Organza", value: "Organza" },
+                                        { label: "Linen", value: "Linen" },
+                                        { label: "Georgette", value: "Georgette" },
+                                        { label: "Kota", value: "Kota" },
+                                    ]}
+                                />
                             </Form.Item>
                         </Col>
 
                         {/* Numbers */}
-                        <Col xs={12} md={6}>
+                        <Col xs={24} md={6}>
                             <Form.Item
                                 label="Price"
                                 name="price"
@@ -316,7 +446,7 @@ export default function ProductsPage() {
                                 <InputNumber min={0} style={{ width: "100%" }} />
                             </Form.Item>
                         </Col>
-                        <Col xs={12} md={6}>
+                        <Col xs={24} md={6}>
                             <Form.Item
                                 label="Original Price"
                                 name="originalPrice"
@@ -325,16 +455,43 @@ export default function ProductsPage() {
                                 <InputNumber min={0} style={{ width: "100%" }} />
                             </Form.Item>
                         </Col>
-                        <Col xs={12} md={6}>
+                        <Col xs={24} md={6}>
                             <Form.Item
+                                shouldUpdate={(prevValues, currentValues) =>
+                                    prevValues.price !== currentValues.price ||
+                                    prevValues.originalPrice !== currentValues.originalPrice
+                                }
+                            >
+                                {({ getFieldValue, setFieldsValue }) => {
+                                    const price = getFieldValue("price");
+                                    const originalPrice = getFieldValue("originalPrice");
+
+                                    let discount = null;
+                                    if (price != null && originalPrice != null && originalPrice !== 0) {
+                                        discount = Math.round(((originalPrice - price) / originalPrice) * 100);
+                                    }
+
+                                    // Update discount field
+                                    setFieldsValue({
+                                        discountPercentage: discount,
+                                    });
+
+                                    return (
+                                        <Form.Item label="Discount (%)" name="discountPercentage">
+                                            <InputNumber min={0} max={100} style={{ width: "100%" }} readOnly />
+                                        </Form.Item>
+                                    );
+                                }}
+                            </Form.Item>
+                            {/* <Form.Item
                                 label="Discount %"
                                 name="discountPercentage"
                                 rules={[{ required: true }]}
                             >
                                 <InputNumber min={0} max={100} style={{ width: "100%" }} />
-                            </Form.Item>
+                            </Form.Item> */}
                         </Col>
-                        <Col xs={12} md={6}>
+                        <Col xs={24} md={6}>
                             <Form.Item
                                 label="Stock"
                                 name="stock"
@@ -383,134 +540,91 @@ export default function ProductsPage() {
 
                         {/* Buttons */}
                         <Col span={24}>
-                            <Space>
-                                <Button type="primary" htmlType="submit">
-                                    {editing ? "Update Product" : "Add Product"}
-                                </Button>
-                                {editing && (
-                                    <Button onClick={handleCancel} danger>
-                                        Cancel
+                            <div style={{ textAlign: "right" }}>
+                                <Space>
+                                    <Button type="primary" htmlType="submit">
+                                        {editing ? "Update Product" : "Add Product"}
                                     </Button>
-                                )}
-                            </Space>
+                                    {editing && (
+                                        <Button onClick={handleCancel} danger>
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </Space>
+                            </div>
                         </Col>
                     </Row>
                 </Form>
             </Card>
 
-            {/* ---------------- PRODUCT LIST ---------------- */}
-            <Typography.Title level={3} style={{ marginBottom: 20 }}>
+
+
+            {/* ---------------- ADVANCED TABLE ---------------- */}
+
+            <Typography.Title
+                level={3}
+                style={{ textAlign: "center", marginBottom: 30 }}
+            >
                 Product List
             </Typography.Title>
+            <Row style={{ marginBottom: 16 }} gutter={16}>
+                <Col xs={24} sm={12} md={8}>
+                    <Input
+                        placeholder="Search by Product ID"
+                        value={searchProductId}
+                        onChange={(e) => setSearchProductId(e.target.value)}
+                    />
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                    <Input
+                        placeholder="Search by title"
+                        value={searchTitle}
+                        onChange={(e) => setSearchTitle(e.target.value)}
+                    />
+                </Col>
 
-            <Row gutter={[24, 24]}>
-                {paginatedProducts.map((product) => (
-                    <Col xs={24} sm={12} md={8} lg={6} key={product.productId}>
-                        <Badge.Ribbon
-                            text={
-                                product.newArrival
-                                    ? "New"
-                                    : product.bestSeller
-                                        ? "Best Seller"
-                                        : ""
-                            }
-                            color={product.newArrival ? "green" : "blue"}
-                        >
-                            <Card
-                                hoverable
-                                style={{
-                                    borderRadius: 12,
-                                    overflow: "hidden",
-                                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                                    transition: "transform 0.2s, box-shadow 0.2s",
-                                }}
-                                onMouseEnter={(e) =>
-                                    (e.currentTarget.style.transform = "translateY(-5px)")
-                                }
-                                onMouseLeave={(e) =>
-                                    (e.currentTarget.style.transform = "translateY(0)")
-                                }
-                            >
-                                {/* Image */}
-                                {product.images?.[0] && (
-                                    <div style={{ textAlign: "center", marginBottom: 12 }}>
-                                        <img
-                                            src={product.images[0]}
-                                            alt={product.title}
-                                            style={{
-                                                width: "100%",
-                                                height: 180,
-                                                objectFit: "cover",
-                                                borderRadius: 8,
-                                            }}
-                                        />
-                                    </div>
-                                )}
-
-                                {/* Info */}
-                                <div style={{ marginBottom: 12 }}>
-                                    <Typography.Title level={5} style={{ margin: 0 }}>
-                                        {product.title}
-                                    </Typography.Title>
-                                    <Typography.Text type="secondary">
-                                        {product.category}
-                                    </Typography.Text>
-                                    <br />
-                                    <Typography.Text strong>₹{product.price}</Typography.Text>
-                                    {product.stock === 0 && (
-                                        <Badge
-                                            count="Out of Stock"
-                                            style={{ backgroundColor: "#ff4d4f", marginLeft: 8 }}
-                                        />
-                                    )}
-                                </div>
-
-                                {/* Actions */}
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        marginTop: 12,
-                                    }}
-                                >
-                                    <Button
-                                        icon={<InfoCircleOutlined />}
-                                        size="small"
-                                        onClick={() => showDetails(product)}
-                                    >
-                                        More Details
-                                    </Button>
-                                    <div>
-                                        <EditOutlined
-                                            style={{
-                                                color: "#1890ff",
-                                                fontSize: 18,
-                                                cursor: "pointer",
-                                                marginRight: 8,
-                                            }}
-                                            onClick={() => handleEdit(product)}
-                                        />
-                                        <DeleteOutlined
-                                            style={{
-                                                color: "#ff4d4f",
-                                                fontSize: 18,
-                                                cursor: "pointer",
-                                            }}
-                                            onClick={() => handleDelete(product._id)}
-                                        />
-                                    </div>
-                                </div>
-                            </Card>
-                        </Badge.Ribbon>
-                    </Col>
-                ))}
+                <Col xs={24} sm={12} md={8}>
+                    <Select
+                        placeholder="Filter by category"
+                        allowClear
+                        style={{ width: "100%" }}
+                        value={categoryFilter}
+                        onChange={(val) => setCategoryFilter(val)}
+                    >
+                        <Select.Option value="Women">Women</Select.Option>
+                    </Select>
+                </Col>
             </Row>
+
+            <Table
+                columns={columns}
+                dataSource={paginatedProducts}
+                rowKey="productId"
+                bordered
+                expandable={{
+                    expandedRowRender: (record) => (
+                        <div>
+                            <Typography.Text>
+                                <strong>Sub Category:</strong> {record.subCategory}
+                            </Typography.Text>
+                            <br />
+                            <Typography.Text>
+                                <strong>Sizes:</strong> {record.sizes?.join(", ")}
+                            </Typography.Text>
+                            <br />
+                            <Typography.Text>
+                                <strong>Colors:</strong> {record.colors?.join(", ")}
+                            </Typography.Text>
+                        </div>
+                    ),
+                }}
+                pagination={false}
+            />
 
             {totalPages > 1 && (
                 <Pagination
                     current={currentPage}
-                    total={products.length}
+                    total={filteredProducts.length}
                     pageSize={itemsPerPage}
                     onChange={setCurrentPage}
                     style={{ marginTop: 30, textAlign: "center" }}
@@ -518,15 +632,14 @@ export default function ProductsPage() {
             )}
 
             {/* ---------------- PRODUCT DETAILS MODAL ---------------- */}
-            {/* ---------------- PRODUCT DETAILS MODAL ---------------- */}
             <Modal
                 open={modalVisible}
                 title={selectedProduct?.title}
                 onCancel={handleModalClose}
                 footer={null}
                 width={700}
-                centered // Ensures modal is vertically centered
-                bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }} // Internal scroll
+                centered
+                bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
             >
                 {selectedProduct && (
                     <div>
@@ -565,8 +678,7 @@ export default function ProductsPage() {
                             )}
                         </Typography.Paragraph>
                         <Typography.Paragraph>
-                            <strong>Discount:</strong>{" "}
-                            {selectedProduct.discountPercentage || 0}%
+                            <strong>Discount:</strong> {selectedProduct.discountPercentage || 0}%
                         </Typography.Paragraph>
                         <Typography.Paragraph>
                             <strong>Stock:</strong> {selectedProduct.stock}

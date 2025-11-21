@@ -24,7 +24,7 @@ import {
   UploadOutlined,
   EditOutlined,
   DeleteOutlined,
-  InfoCircleOutlined,
+  InfoCircleOutlined
 } from "@ant-design/icons";
 import {
   uploadAssets,
@@ -77,9 +77,8 @@ export default function ProductsPage() {
   const itemsPerPage = 6;
   const [productId, setProductId] = useState();
   const [mongoId, setMongoId] = useState();
-  const [searchTitle, setSearchTitle] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Women");
-  const [searchProductId, setSearchProductId] = useState("");
+  const [filterBy, setfilterBy] = useState("");
 
   useEffect(() => {
     setProductId(getProductId());
@@ -190,9 +189,12 @@ export default function ProductsPage() {
   // Filtered products for search and category filter
 
   const filteredProducts = products
-    .filter((p) => p.title.toLowerCase().includes(searchTitle.toLowerCase()))
-    .filter((p) => (categoryFilter ? p.category === categoryFilter : true))
-    .filter((p) => p.productId.toString().includes(searchProductId.toString()));
+    .filter(
+      (p) =>
+        p.title.toLowerCase().includes(filterBy.toLowerCase()) ??
+        p.productId.toString().includes(filterBy.toString())
+    )
+    .filter((p) => (categoryFilter ? p.category === categoryFilter : true));
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = filteredProducts.slice(
@@ -201,9 +203,24 @@ export default function ProductsPage() {
   );
 
   const columns = [
+    { title: "Product ID", key: "productId", dataIndex: "productId" },
+    {
+      title: "Product",
+      dataIndex: "title",
+      key: "title",
+      sorter: (a, b) => a.title.localeCompare(b.title),
+      render: (text, record) => (
+        <div>
+          <Typography.Text strong>{record.title}</Typography.Text>
+          <br />
+          <Typography.Text type="secondary">{record.category}</Typography.Text>
+        </div>
+      ),
+    },
     {
       title: "Image",
       dataIndex: "images",
+      align: 'center',
       key: "images",
       render: (images) => (
         <img
@@ -219,28 +236,18 @@ export default function ProductsPage() {
         />
       ),
     },
+    
     {
-      title: "Product",
-      dataIndex: "title",
-      key: "title",
-      sorter: (a, b) => a.title.localeCompare(b.title),
-      render: (text, record) => (
-        <div>
-          <Typography.Text strong>{record.title}</Typography.Text>
-          <br />
-          <Typography.Text type="secondary">{record.category}</Typography.Text>
-        </div>
-      ),
-    },
-    {
-      title: "Price",
+      title: "Price (INR)",
+      align: 'center',
       dataIndex: "price",
       key: "price",
       sorter: (a, b) => a.price - b.price,
-      render: (price) => <Typography.Text strong>₹{price}</Typography.Text>,
+      render: (price) => <Typography.Text strong>  {price}</Typography.Text>,
     },
     {
       title: "Stock",
+      align: 'center',
       dataIndex: "stock",
       key: "stock",
       sorter: (a, b) => a.stock - b.stock,
@@ -253,6 +260,7 @@ export default function ProductsPage() {
     },
     {
       title: "Tag",
+      align: 'center',
       key: "tag",
       render: (row) =>
         row.newArrival ? (
@@ -266,6 +274,7 @@ export default function ProductsPage() {
     {
       title: "Actions",
       key: "actions",
+      align: 'center',
       render: (row) => (
         <Space size="middle">
           <Button
@@ -573,16 +582,9 @@ export default function ProductsPage() {
       <Row style={{ marginBottom: 16 }} gutter={16}>
         <Col xs={24} sm={12} md={8}>
           <Input
-            placeholder="Search by Product ID"
-            value={searchProductId}
-            onChange={(e) => setSearchProductId(e.target.value)}
-          />
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Input
-            placeholder="Search by title"
-            value={searchTitle}
-            onChange={(e) => setSearchTitle(e.target.value)}
+            placeholder="Search by Title, Product ID"
+            value={filterBy}
+            onChange={(e) => setfilterBy(e.target.value)}
           />
         </Col>
 
@@ -604,23 +606,23 @@ export default function ProductsPage() {
         dataSource={paginatedProducts}
         rowKey="productId"
         bordered
-        expandable={{
-          expandedRowRender: (record) => (
-            <div>
-              <Typography.Text>
-                <strong>Sub Category:</strong> {record.subCategory}
-              </Typography.Text>
-              <br />
-              <Typography.Text>
-                <strong>Sizes:</strong> {record.sizes?.join(", ")}
-              </Typography.Text>
-              <br />
-              <Typography.Text>
-                <strong>Colors:</strong> {record.colors?.join(", ")}
-              </Typography.Text>
-            </div>
-          ),
-        }}
+        // expandable={{
+        //   expandedRowRender: (record) => (
+        //     <div>
+        //       <Typography.Text>
+        //         <strong>Sub Category:</strong> {record.subCategory}
+        //       </Typography.Text>
+        //       <br />
+        //       <Typography.Text>
+        //         <strong>Sizes:</strong> {record.sizes?.join(", ")}
+        //       </Typography.Text>
+        //       <br />
+        //       <Typography.Text>
+        //         <strong>Colors:</strong> {record.colors?.join(", ")}
+        //       </Typography.Text>
+        //     </div>
+        //   ),
+        // }}
         pagination={false}
       />
 

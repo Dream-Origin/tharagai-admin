@@ -24,7 +24,7 @@ import {
   UploadOutlined,
   EditOutlined,
   DeleteOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import {
   uploadAssets,
@@ -78,7 +78,12 @@ export default function ProductsPage() {
   const [productId, setProductId] = useState();
   const [mongoId, setMongoId] = useState();
   const [categoryFilter, setCategoryFilter] = useState("Women");
+
   const [filterBy, setfilterBy] = useState("");
+
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [paginatedProducts, setPaginatedProducts] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     setProductId(getProductId());
@@ -188,19 +193,23 @@ export default function ProductsPage() {
 
   // Filtered products for search and category filter
 
-  const filteredProducts = products
-    .filter(
-      (p) =>
-        p.title.toLowerCase().includes(filterBy.toLowerCase()) ??
-        p.productId.toString().includes(filterBy.toString())
-    )
-    .filter((p) => (categoryFilter ? p.category === categoryFilter : true));
-
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  useEffect(() => {
+    const filteredProducts = products
+      .filter(
+        (p) =>
+          p.title.toLowerCase().includes(filterBy.toLowerCase()) ||
+          p.productId.toLowerCase().includes(filterBy.toLowerCase())
+      )
+      .filter((p) => (categoryFilter ? p.category === categoryFilter : true));
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginatedProducts = filteredProducts.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+    setTotalPages(totalPages);
+    setPaginatedProducts(paginatedProducts);
+    setFilteredProducts(filteredProducts);
+  }, [products, filterBy]);
 
   const columns = [
     { title: "Product ID", key: "productId", dataIndex: "productId" },
@@ -220,7 +229,7 @@ export default function ProductsPage() {
     {
       title: "Image",
       dataIndex: "images",
-      align: 'center',
+      align: "center",
       key: "images",
       render: (images) => (
         <img
@@ -236,18 +245,18 @@ export default function ProductsPage() {
         />
       ),
     },
-    
+
     {
       title: "Price (INR)",
-      align: 'center',
+      align: "center",
       dataIndex: "price",
       key: "price",
       sorter: (a, b) => a.price - b.price,
-      render: (price) => <Typography.Text strong>  {price}</Typography.Text>,
+      render: (price) => <Typography.Text strong> {price}</Typography.Text>,
     },
     {
       title: "Stock",
-      align: 'center',
+      align: "center",
       dataIndex: "stock",
       key: "stock",
       sorter: (a, b) => a.stock - b.stock,
@@ -260,7 +269,7 @@ export default function ProductsPage() {
     },
     {
       title: "Tag",
-      align: 'center',
+      align: "center",
       key: "tag",
       render: (row) =>
         row.newArrival ? (
@@ -274,7 +283,7 @@ export default function ProductsPage() {
     {
       title: "Actions",
       key: "actions",
-      align: 'center',
+      align: "center",
       render: (row) => (
         <Space size="middle">
           <Button
@@ -580,6 +589,7 @@ export default function ProductsPage() {
         Product List
       </Typography.Title>
       <Row style={{ marginBottom: 16 }} gutter={16}>
+        <Col xs={24} sm={12} md={13}></Col>
         <Col xs={24} sm={12} md={8}>
           <Input
             placeholder="Search by Title, Product ID"
@@ -588,7 +598,7 @@ export default function ProductsPage() {
           />
         </Col>
 
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={12} md={3}>
           <Select
             placeholder="Filter by category"
             allowClear

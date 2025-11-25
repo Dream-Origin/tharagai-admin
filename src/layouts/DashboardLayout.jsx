@@ -22,9 +22,9 @@ const DashboardLayout = () => {
   const toggle = () => setCollapsed(!collapsed);
 
   const menuItems = [
-    // { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
+    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
     { key: '/products', icon: <ShoppingCartOutlined />, label: 'Products' },
-    // { key: '/orders', icon: <ShoppingCartOutlined />, label: 'Orders' },
+    { key: '/orders', icon: <ShoppingCartOutlined />, label: 'Orders' },
   ];
 
   const handleMenuClick = (e) => {

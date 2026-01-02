@@ -700,10 +700,10 @@ export default function ProductsPage() {
               <strong>Stock:</strong> {selectedProduct.stock}
             </Typography.Paragraph>
             <Typography.Paragraph>
-              <strong>Sizes:</strong> {selectedProduct.sizes.join(", ")}
+              <strong>Sizes:</strong> {selectedProduct.sizes?.join(", ")}
             </Typography.Paragraph>
             <Typography.Paragraph>
-              <strong>Colors:</strong> {selectedProduct.colors.join(", ")}
+              <strong>Colors:</strong> {selectedProduct.colors?.join(", ")}
             </Typography.Paragraph>
             <Typography.Paragraph>
               <strong>Description:</strong> {selectedProduct.description || "-"}

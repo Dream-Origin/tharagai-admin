@@ -90,6 +90,10 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+  setCurrentPage(1);
+}, [filterBy, categoryFilter]);
+
   const loadProducts = async () => {
     setLoading(true);
     try {
@@ -194,22 +198,25 @@ export default function ProductsPage() {
   // Filtered products for search and category filter
 
   useEffect(() => {
-    const filteredProducts = products
-      .filter(
-        (p) =>
-          p.title.toLowerCase().includes(filterBy.toLowerCase()) ||
-          p.productId.toLowerCase().includes(filterBy.toLowerCase())
-      )
-      .filter((p) => (categoryFilter ? p.category === categoryFilter : true));
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-    const paginatedProducts = filteredProducts.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
-    setTotalPages(totalPages);
-    setPaginatedProducts(paginatedProducts);
-    setFilteredProducts(filteredProducts);
-  }, [products, filterBy]);
+  const filtered = products
+    .filter(
+      (p) =>
+        p.title.toLowerCase().includes(filterBy.toLowerCase()) ||
+        p.productId.toLowerCase().includes(filterBy.toLowerCase())
+    )
+    .filter((p) => (categoryFilter ? p.category === categoryFilter : true));
+
+  const total = Math.ceil(filtered.length / itemsPerPage);
+
+  const paginated = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  setTotalPages(total);
+  setFilteredProducts(filtered);
+  setPaginatedProducts(paginated);
+}, [products, filterBy, categoryFilter, currentPage]);
 
   const columns = [
     { title: "Product ID", key: "productId", dataIndex: "productId" },
@@ -377,7 +384,7 @@ export default function ProductsPage() {
               <label style={{ fontWeight: 600 }}>Attributes</label>
               <Row>
                 {booleanAttributes.map((attr) => (
-                  <Col xs={24} sm={8} md={4} key={attr}>
+                  <Col xs={24} sm={8} md={4} key={attr.value}>
                     <Form.Item
                       name={attr.value}
                       valuePropName="checked"

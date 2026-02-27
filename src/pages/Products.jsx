@@ -19,6 +19,7 @@ import {
   Table,
   Tag,
   Pagination,
+  message,
 } from "antd";
 import {
   UploadOutlined,
@@ -32,6 +33,7 @@ import {
   saveProduct,
   updateProduct,
   deleteProduct,
+  bulkDeleteProducts,
 } from "../api/productApi";
 import { csvToArray, getProductId } from "../utils/helpers";
 
@@ -81,6 +83,7 @@ export default function ProductsPage() {
 
   const [filterBy, setfilterBy] = useState("");
 
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [paginatedProducts, setPaginatedProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -138,6 +141,32 @@ export default function ProductsPage() {
       setLoading(true);
       await deleteProduct(id);
       loadProducts();
+      setLoading(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedRowKeys.length === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedRowKeys.length} selected product(s)?`
+      )
+    ) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await bulkDeleteProducts(selectedRowKeys);
+      message.success(
+        result.deletedCount !== undefined
+          ? `Deleted ${result.deletedCount} product(s) successfully.`
+          : "Bulk delete completed."
+      );
+      setSelectedRowKeys([]);
+      await loadProducts();
+    } catch (err) {
+      message.error(err.message || "Bulk delete failed.");
+    } finally {
       setLoading(false);
     }
   };
@@ -616,12 +645,27 @@ export default function ProductsPage() {
             <Select.Option value="Women">Women</Select.Option>
           </Select>
         </Col>
+        <Col xs={24} sm={12} md={3}>
+          <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            disabled={selectedRowKeys.length === 0}
+            onClick={handleBulkDelete}
+          >
+            Delete selected ({selectedRowKeys.length})
+          </Button>
+        </Col>
       </Row>
 
       <Table
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys),
+        }}
         columns={columns}
         dataSource={paginatedProducts}
-        rowKey="productId"
+        rowKey="_id"
         bordered
         // expandable={{
         //   expandedRowRender: (record) => (

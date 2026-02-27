@@ -43,6 +43,31 @@ export async function deleteProduct(productId) {
   }
 }
 
+export async function bulkDeleteProducts(ids) {
+  const res = await fetch(`${API_BASE_URL}/products/bulk`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || "Failed to bulk delete products");
+  }
+  return await res.json();
+}
+
+export async function deleteProducts(productIds) {
+  const results = await Promise.allSettled(
+    productIds.map((id) => deleteProduct(id))
+  );
+  const failed = results.filter((r) => r.status === "rejected");
+  if (failed.length > 0) {
+    throw new Error(
+      `${failed.length} of ${productIds.length} product(s) failed to delete.`
+    );
+  }
+}
+
 export async function uploadAssets(file) {
   const formData = new FormData();
   formData.append("image", file);

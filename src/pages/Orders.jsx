@@ -86,7 +86,7 @@ export default function AdminOrders() {
 
       {/* Modern Order Details Modal */}
       <Modal
-        visible={modalVisible}
+        open={modalVisible}
         title={<Title level={4} style={{ margin: 0 }}>Order #{selectedOrder?.orderId}</Title>}
         onCancel={() => setModalVisible(false)}
         footer={[

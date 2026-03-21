@@ -13,7 +13,8 @@
 /* INPUT & SELECT COMMON STYLES */
 .ant-input,
 .ant-input-number,
-.ant-select-selector {
+.ant-select-selector,
+.ant-input-affix-wrapper {
   border-radius: 2px !important;
   border: 1px solid #d9d9d9 !important;
   /* padding: 6px 12px !important; */
@@ -26,10 +27,26 @@ textarea.ant-input {
 /* FOCUS EFFECT */
 .ant-input:focus,
 .ant-input:hover,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper:hover,
+.ant-input-affix-wrapper-focused,
 .ant-select-selector:hover,
 .ant-select-focused .ant-select-selector {
   border-color: #7c5dfa !important; /* purple highlight */
   box-shadow: 0 0 6px rgba(124, 93, 250, 0.3) !important;
+}
+
+/* Prevent double border in Input.Password */
+.ant-input-affix-wrapper .ant-input {
+  border: none !important;
+  box-shadow: none !important;
+  height: auto !important;
+}
+
+.ant-input-affix-wrapper .ant-input:focus,
+.ant-input-affix-wrapper .ant-input:hover {
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* SELECT DROPDOWN */
@@ -60,6 +77,7 @@ textarea.ant-input {
 /* SMOOTH TRANSITIONS */
 .ant-checkbox-inner,
 .ant-input,
+.ant-input-affix-wrapper,
 .ant-select-selector {
   transition: all 0.2s ease !important;
 }

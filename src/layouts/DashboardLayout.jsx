@@ -9,7 +9,6 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { CustomNotification } from '../components/CustomNotification.jsx';
 
 const { Header, Sider, Content } = Layout;
 
@@ -33,7 +32,6 @@ const DashboardLayout = () => {
 
   return (
     <>
-      <CustomNotification />
       <Layout style={{ minHeight: '100vh' }}>
         <Sider
           collapsible

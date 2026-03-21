@@ -75,7 +75,7 @@ const Login = () => {
             </Button>
           </Form.Item>
           <div style={{ textAlign: 'center', color: '#6b7280' }}>
-            Don&apos;t have an account? <Link to="/register">Register</Link>
+            {/* Don&apos;t have an account? <Link to="/register">Register</Link> */}
           </div>
         </Form>
       </Card>

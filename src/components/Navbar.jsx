@@ -20,6 +20,10 @@ const Navbar = () => {
         justifyContent: "flex-end",
         alignItems: "center",
         background: "#fff",
+        position: 'sticky',
+        top: 0,
+        zIndex: 1100,
+        boxShadow: '0 1px 6px rgba(0,0,0,0.06)'
       }}
     >
       <Dropdown overlay={menu} placement="bottomRight">

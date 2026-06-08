@@ -259,7 +259,7 @@ export default function ProductsPage() {
     roles.includes("admin");
 
   const columns = [
-    { title: "Product ID", key: "productId", dataIndex: "productId" },
+    { title: "Product ID", key: "productId", dataIndex: "productId", responsive: ["sm","md","lg"] },
     {
       title: "Product",
       dataIndex: "title",
@@ -291,6 +291,7 @@ export default function ProductsPage() {
           }}
         />
       ),
+      responsive: ["md","lg"],
     },
 
     {
@@ -359,6 +360,9 @@ export default function ProductsPage() {
           )}
         </Space>
       ),
+      fixed: 'right',
+      width: 120,
+      responsive: ["xs","sm","md","lg"]
     },
   ];
 
@@ -708,6 +712,7 @@ export default function ProductsPage() {
         //   ),
         // }}
         pagination={false}
+        scroll={{ x: 'max-content' }}
       />
 
       {totalPages > 1 && (

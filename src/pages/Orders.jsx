@@ -44,10 +44,10 @@ export default function AdminOrders() {
   };
 
   const columns = [
-    { title: "Order ID", dataIndex: "orderId", key: "orderId" },
-    { title: "User", render: (_, record) => `${record.user.firstName} ${record.user.lastName}` },
-    { title: "Email", dataIndex: ["user", "email"] },
-    { title: "Mobile", dataIndex: ["user", "phone"] },
+    { title: "Order ID", dataIndex: "orderId", key: "orderId", responsive: ["xs", "sm", "md", "lg"] },
+    { title: "User", render: (_, record) => `${record.user.firstName} ${record.user.lastName}`, responsive: ["xs", "sm", "md", "lg"] },
+    { title: "Email", dataIndex: ["user", "email"], responsive: ["md", "lg"] },
+    { title: "Mobile", dataIndex: ["user", "phone"], responsive: ["sm", "md", "lg"] },
     {
       title: "Status",
       dataIndex: "status",
@@ -60,14 +60,16 @@ export default function AdminOrders() {
           {statusOptions.map((s) => <Option key={s} value={s}>{s}</Option>)}
         </Select>
       ),
+      responsive: ["sm", "md", "lg"]
     },
-    { title: "Total Amount", dataIndex: "totalAmount", render: (amt) => `₹${amt}` },
+    { title: "Total Amount", dataIndex: "totalAmount", render: (amt) => `₹${amt}`, responsive: ["sm", "md", "lg"] },
     {
       title: "Payment Status",
       dataIndex: ["payment", "status"],
       render: (status) => (
         <Tag color={status === "Confirmed" ? "green" : "orange"}>{status}</Tag>
       ),
+      responsive: ["md", "lg"],
     },
     {
       title: "Action",
@@ -76,13 +78,23 @@ export default function AdminOrders() {
           View
         </Button>
       ),
+      fixed: 'right',
+      width: 80,
     },
   ];
 
   return (
     <div>
       <h2 style={{ marginBottom: 20 }}>All Orders</h2>
-      {loading ? <Spin size="large" /> : <Table rowKey="_id" columns={columns} dataSource={orders} />}
+      {loading ? <Spin size="large" /> : (
+        <Table
+          rowKey="_id"
+          columns={columns}
+          dataSource={orders}
+          scroll={{ x: 'max-content' }}
+          pagination={{ pageSize: 10 }}
+        />
+      )}
 
       {/* Modern Order Details Modal */}
       <Modal

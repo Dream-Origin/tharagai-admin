@@ -121,7 +121,9 @@ export default function AdminOrders() {
               <div key={item.productId} className="order-item-card">
                 <img src={item.images[0]} alt={item.title} className="order-item-img"/>
                 <div className="order-item-details">
+                  
                   <Text strong>{item.title}</Text><br/>
+                  <Text>Product ID: <Tag color="#108ee9">{item.productId}</Tag></Text><br/>
                   <Text>Size: {item.size || "N/A"} | Qty: {item.quantity}</Text><br/>
                   <Text>Price: ₹{item.price}</Text>
                 </div>

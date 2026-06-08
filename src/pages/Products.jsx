@@ -94,8 +94,8 @@ export default function ProductsPage() {
   }, []);
 
   useEffect(() => {
-  setCurrentPage(1);
-}, [filterBy, categoryFilter]);
+    setCurrentPage(1);
+  }, [filterBy, categoryFilter]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -227,25 +227,36 @@ export default function ProductsPage() {
   // Filtered products for search and category filter
 
   useEffect(() => {
-  const filtered = products
-    .filter(
-      (p) =>
-        p.title.toLowerCase().includes(filterBy.toLowerCase()) ||
-        p.productId.toLowerCase().includes(filterBy.toLowerCase())
-    )
-    .filter((p) => (categoryFilter ? p.category === categoryFilter : true));
+    const filtered = products
+      .filter(
+        (p) =>
+          p.title.toLowerCase().includes(filterBy.toLowerCase()) ||
+          p.productId.toLowerCase().includes(filterBy.toLowerCase())
+      )
+      .filter((p) => (categoryFilter ? p.category === categoryFilter : true));
 
-  const total = Math.ceil(filtered.length / itemsPerPage);
+    const total = Math.ceil(filtered.length / itemsPerPage);
 
-  const paginated = filtered.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    const paginated = filtered.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
-  setTotalPages(total);
-  setFilteredProducts(filtered);
-  setPaginatedProducts(paginated);
-}, [products, filterBy, categoryFilter, currentPage]);
+    setTotalPages(total);
+    setFilteredProducts(filtered);
+    setPaginatedProducts(paginated);
+  }, [products, filterBy, categoryFilter, currentPage]);
+
+  const roles = JSON.parse(localStorage.getItem("auth_roles") || "[]");
+
+  const canEdit =
+    roles.includes("admin");
+
+  const canDelete =
+    roles.includes("admin");
+
+  const canAdd =
+    roles.includes("admin");
 
   const columns = [
     { title: "Product ID", key: "productId", dataIndex: "productId" },
@@ -332,14 +343,20 @@ export default function ProductsPage() {
           >
             Details
           </Button>
-          <EditOutlined
-            style={{ color: "#1677ff", fontSize: 18, cursor: "pointer" }}
-            onClick={() => handleEdit(row)}
-          />
-          <DeleteOutlined
-            style={{ color: "#ff4d4f", fontSize: 18, cursor: "pointer" }}
-            onClick={() => handleDelete(row._id)}
-          />
+
+          {canEdit && (
+            <EditOutlined
+              style={{ color: "#1677ff", fontSize: 18, cursor: "pointer" }}
+              onClick={() => handleEdit(row)}
+            />
+          )}
+
+          {canDelete && (
+            <DeleteOutlined
+              style={{ color: "#ff4d4f", fontSize: 18, cursor: "pointer" }}
+              onClick={() => handleDelete(row._id)}
+            />
+          )}
         </Space>
       ),
     },
@@ -347,274 +364,278 @@ export default function ProductsPage() {
 
   return (
     <Spin spinning={loading}>
-      <Typography.Title
-        level={3}
-        style={{ textAlign: "center", marginBottom: 30 }}
-      >
-        Product Manager
-      </Typography.Title>
-
-      {/* ---------------- PRODUCT FORM ---------------- */}
-      <Card
-        style={{
-          borderRadius: 12,
-          marginBottom: 40,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-        }}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          initialValues={initialFormState}
+      {canAdd && (<>
+        <Typography.Title
+          level={3}
+          style={{ textAlign: "center", marginBottom: 30 }}
         >
-          <Row gutter={[16, 16]}>
-            <Col xs={24} md={6}>
-              <Form.Item label="Product ID" name="productId">
-                {productId}
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Title"
-                name="title"
-                rules={[{ required: true }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Category"
-                name="category"
-                rules={[{ required: true }]}
-              >
-                <Select options={[{ label: "Women", value: "Women" }]} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Sub Category"
-                name="subCategory"
-                rules={[{ required: true }]}
-              >
-                <Select
-                  placeholder="Select Sub Category"
-                  options={[
-                    { label: "Salwar Materials", value: "Salwar Materials" },
-                    { label: "Ready to Wear", value: "Ready to Wear" },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
+          Product Manager
+        </Typography.Title>
 
-            {/* Attributes */}
-            <Col span={24}>
-              <label style={{ fontWeight: 600 }}>Attributes</label>
-              <Row>
-                {booleanAttributes.map((attr) => (
-                  <Col xs={24} sm={8} md={4} key={attr.value}>
-                    <Form.Item
-                      name={attr.value}
-                      valuePropName="checked"
-                      noStyle
-                    >
-                      <Checkbox style={{ marginBottom: 10 }}>
-                        {attr.label}
-                      </Checkbox>
-                    </Form.Item>
-                  </Col>
-                ))}
-              </Row>
-            </Col>
+        {/* ---------------- PRODUCT FORM ---------------- */}
 
-            {/* Sizes, Colors, Tags */}
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Sizes"
-                name="sizes"
-                rules={[{ required: false }]}
-              >
-                <Select
-                  placeholder="S, M, L,..."
-                  mode="multiple"
-                  allowClear
-                  options={[
-                    { label: "XS", value: "XS" },
-                    { label: "S", value: "S" },
-                    { label: "M", value: "M" },
-                    { label: "L", value: "L" },
-                    { label: "XL", value: "XL" },
-                    { label: "XXL", value: "XXL" },
-                    { label: "XXXL", value: "XXXL" },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item label="Colors" name="colors">
-                <Input placeholder="Red" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item label="Tags" name="tags">
-                <Input placeholder="New" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Fabric"
-                name="fabric"
-                rules={[{ required: false }]}
-              >
-                <Select
-                  mode="tags"
-                  maxCount={1} // <-- allows typing custom values
-                  placeholder="Select or type fabric"
-                  allowClear
-                  options={[
-                    { label: "Cotton", value: "Cotton" },
-                    { label: "Silk Cotton", value: "Silk Cotton" },
-                    { label: "Silk", value: "Silk" },
-                    { label: "Organza", value: "Organza" },
-                    { label: "Linen", value: "Linen" },
-                    { label: "Georgette", value: "Georgette" },
-                    { label: "Kota", value: "Kota" },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
+        <Card
+          style={{
+            borderRadius: 12,
+            marginBottom: 40,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+          }}
+        >
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            initialValues={initialFormState}
+          >
+            <Row gutter={[16, 16]}>
+              <Col xs={24} md={6}>
+                <Form.Item label="Product ID" name="productId">
+                  {productId}
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Title"
+                  name="title"
+                  rules={[{ required: true }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Category"
+                  name="category"
+                  rules={[{ required: true }]}
+                >
+                  <Select options={[{ label: "Women", value: "Women" }]} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Sub Category"
+                  name="subCategory"
+                  rules={[{ required: true }]}
+                >
+                  <Select
+                    placeholder="Select Sub Category"
+                    options={[
+                      { label: "Salwar Materials", value: "Salwar Materials" },
+                      { label: "Ready to Wear", value: "Ready to Wear" },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
 
-            {/* Numbers */}
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Selling Price"
-                name="price"
-                rules={[{ required: true }]}
-              >
-                <InputNumber min={0} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Actual Price"
-                name="originalPrice"
-                rules={[{ required: true }]}
-              >
-                <InputNumber min={0} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item
-                shouldUpdate={(prevValues, currentValues) =>
-                  prevValues.price !== currentValues.price ||
-                  prevValues.originalPrice !== currentValues.originalPrice
-                }
-              >
-                {({ getFieldValue, setFieldsValue }) => {
-                  const price = getFieldValue("price");
-                  const originalPrice = getFieldValue("originalPrice");
+              {/* Attributes */}
+              <Col span={24}>
+                <label style={{ fontWeight: 600 }}>Attributes</label>
+                <Row>
+                  {booleanAttributes.map((attr) => (
+                    <Col xs={24} sm={8} md={4} key={attr.value}>
+                      <Form.Item
+                        name={attr.value}
+                        valuePropName="checked"
+                        noStyle
+                      >
+                        <Checkbox style={{ marginBottom: 10 }}>
+                          {attr.label}
+                        </Checkbox>
+                      </Form.Item>
+                    </Col>
+                  ))}
+                </Row>
+              </Col>
 
-                  let discount = null;
-                  if (
-                    price != null &&
-                    originalPrice != null &&
-                    originalPrice !== 0
-                  ) {
-                    discount = Math.round(
-                      ((originalPrice - price) / originalPrice) * 100
-                    );
+              {/* Sizes, Colors, Tags */}
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Sizes"
+                  name="sizes"
+                  rules={[{ required: false }]}
+                >
+                  <Select
+                    placeholder="S, M, L,..."
+                    mode="multiple"
+                    allowClear
+                    options={[
+                      { label: "XS", value: "XS" },
+                      { label: "S", value: "S" },
+                      { label: "M", value: "M" },
+                      { label: "L", value: "L" },
+                      { label: "XL", value: "XL" },
+                      { label: "XXL", value: "XXL" },
+                      { label: "XXXL", value: "XXXL" },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item label="Colors" name="colors">
+                  <Input placeholder="Red" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item label="Tags" name="tags">
+                  <Input placeholder="New" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Fabric"
+                  name="fabric"
+                  rules={[{ required: false }]}
+                >
+                  <Select
+                    mode="tags"
+                    maxCount={1} // <-- allows typing custom values
+                    placeholder="Select or type fabric"
+                    allowClear
+                    options={[
+                      { label: "Cotton", value: "Cotton" },
+                      { label: "Silk Cotton", value: "Silk Cotton" },
+                      { label: "Silk", value: "Silk" },
+                      { label: "Organza", value: "Organza" },
+                      { label: "Linen", value: "Linen" },
+                      { label: "Georgette", value: "Georgette" },
+                      { label: "Kota", value: "Kota" },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+
+              {/* Numbers */}
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Selling Price"
+                  name="price"
+                  rules={[{ required: true }]}
+                >
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Actual Price"
+                  name="originalPrice"
+                  rules={[{ required: true }]}
+                >
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  shouldUpdate={(prevValues, currentValues) =>
+                    prevValues.price !== currentValues.price ||
+                    prevValues.originalPrice !== currentValues.originalPrice
                   }
+                >
+                  {({ getFieldValue, setFieldsValue }) => {
+                    const price = getFieldValue("price");
+                    const originalPrice = getFieldValue("originalPrice");
 
-                  // Update discount field
-                  setFieldsValue({
-                    discountPercentage: discount,
-                  });
+                    let discount = null;
+                    if (
+                      price != null &&
+                      originalPrice != null &&
+                      originalPrice !== 0
+                    ) {
+                      discount = Math.round(
+                        ((originalPrice - price) / originalPrice) * 100
+                      );
+                    }
 
-                  return (
-                    <Form.Item label="Discount (%)" name="discountPercentage">
-                      <InputNumber
-                        min={0}
-                        max={100}
-                        style={{ width: "100%" }}
-                        readOnly
-                      />
-                    </Form.Item>
-                  );
-                }}
-              </Form.Item>
-              {/* <Form.Item
+                    // Update discount field
+                    setFieldsValue({
+                      discountPercentage: discount,
+                    });
+
+                    return (
+                      <Form.Item label="Discount (%)" name="discountPercentage">
+                        <InputNumber
+                          min={0}
+                          max={100}
+                          style={{ width: "100%" }}
+                          readOnly
+                        />
+                      </Form.Item>
+                    );
+                  }}
+                </Form.Item>
+                {/* <Form.Item
                                 label="Discount %"
                                 name="discountPercentage"
                                 rules={[{ required: true }]}
                             >
                                 <InputNumber min={0} max={100} style={{ width: "100%" }} />
                             </Form.Item> */}
-            </Col>
-            <Col xs={24} md={6}>
-              <Form.Item
-                label="Stock"
-                name="stock"
-                rules={[{ required: true }]}
-              >
-                <InputNumber min={0} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-
-            {/* Description and Details */}
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Description"
-                name="description"
-                rules={[{ required: true }]}
-              >
-                <TextArea rows={4} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item label="Details" name="details">
-                <TextArea rows={4} />
-              </Form.Item>
-            </Col>
-
-            {/* Image Upload */}
-            <Col xs={24} md={12}>
-              <Form.Item label="Images">
-                <Upload
-                  customRequest={handleImageUpload}
-                  listType="picture-card"
-                  fileList={uploadedImages.map((url, idx) => ({
-                    uid: String(idx),
-                    name: `Image-${idx}`,
-                    status: "done",
-                    url,
-                  }))}
-                  onPreview={handlePreview}
-                  onRemove={handleRemove}
+              </Col>
+              <Col xs={24} md={6}>
+                <Form.Item
+                  label="Stock"
+                  name="stock"
+                  rules={[{ required: true }]}
                 >
-                  <UploadOutlined /> Upload
-                </Upload>
-              </Form.Item>
-            </Col>
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
 
-            {/* Buttons */}
-            <Col span={24}>
-              <div style={{ textAlign: "right" }}>
-                <Space>
-                  <Button type="primary" htmlType="submit">
-                    {editing ? "Update Product" : "Add Product"}
-                  </Button>
-                  {editing && (
-                    <Button onClick={handleCancel} danger>
-                      Cancel
+              {/* Description and Details */}
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label="Description"
+                  name="description"
+                  rules={[{ required: true }]}
+                >
+                  <TextArea rows={4} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item label="Details" name="details">
+                  <TextArea rows={4} />
+                </Form.Item>
+              </Col>
+
+              {/* Image Upload */}
+              <Col xs={24} md={12}>
+                <Form.Item label="Images">
+                  <Upload
+                    customRequest={handleImageUpload}
+                    listType="picture-card"
+                    fileList={uploadedImages.map((url, idx) => ({
+                      uid: String(idx),
+                      name: `Image-${idx}`,
+                      status: "done",
+                      url,
+                    }))}
+                    onPreview={handlePreview}
+                    onRemove={handleRemove}
+                  >
+                    <UploadOutlined /> Upload
+                  </Upload>
+                </Form.Item>
+              </Col>
+
+              {/* Buttons */}
+              <Col span={24}>
+                <div style={{ textAlign: "right" }}>
+                  <Space>
+                    <Button type="primary" htmlType="submit">
+                      {editing ? "Update Product" : "Add Product"}
                     </Button>
-                  )}
-                </Space>
-              </div>
-            </Col>
-          </Row>
-        </Form>
-      </Card>
+                    {editing && (
+                      <Button onClick={handleCancel} danger>
+                        Cancel
+                      </Button>
+                    )}
+                  </Space>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </Card>
+      </>
+      )}
 
       {/* ---------------- ADVANCED TABLE ---------------- */}
 
@@ -646,15 +667,17 @@ export default function ProductsPage() {
           </Select>
         </Col>
         <Col xs={24} sm={12} md={3}>
-          <Button
-            type="primary"
-            danger
-            icon={<DeleteOutlined />}
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBulkDelete}
-          >
-            Delete selected ({selectedRowKeys.length})
-          </Button>
+          {canDelete && (
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleBulkDelete}
+            >
+              Delete selected ({selectedRowKeys.length})
+            </Button>
+          )}
         </Col>
       </Row>
 

@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }) => {
       if (!parsed) throw new Error('Invalid token received');
 
       localStorage.setItem('auth_token', token);
+      localStorage.setItem('auth_roles', JSON.stringify(parsed.roles));
       setUser(parsed);
       window.notify?.('success', 'Login successful');
       navigate('/dashboard');

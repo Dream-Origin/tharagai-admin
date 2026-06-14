@@ -81,3 +81,16 @@ textarea.ant-input {
 .ant-select-selector {
   transition: all 0.2s ease !important;
 }
+
+/* Drawer / mobile menu tweaks */
+.ant-drawer-header {
+  background: #001529 !important;
+  color: #fff !important;
+}
+.ant-drawer-body {
+  background: #001529 !important;
+  padding: 0 !important;
+}
+.ant-drawer-mask {
+  background: rgba(0,0,0,0.6) !important;
+}

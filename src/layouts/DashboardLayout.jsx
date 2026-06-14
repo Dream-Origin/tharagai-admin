@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button } from 'antd';
+import { Layout, Menu, Button, Drawer } from 'antd';
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
+  MenuOutlined,
   DashboardOutlined,
   ShoppingCartOutlined,
   LogoutOutlined,
@@ -14,11 +15,27 @@ const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const toggle = () => setCollapsed(!collapsed);
+  const toggle = () => {
+    if (isMobile) {
+      setDrawerVisible((v) => !v);
+    } else {
+      setCollapsed(!collapsed);
+    }
+  };
+
+  // track viewport width to switch to mobile behaviour
+  React.useEffect(() => {
+    const mq = () => setIsMobile(window.innerWidth < 768);
+    mq();
+    window.addEventListener('resize', mq);
+    return () => window.removeEventListener('resize', mq);
+  }, []);
 
   const menuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
@@ -33,37 +50,81 @@ const DashboardLayout = () => {
   return (
     <>
       <Layout style={{ minHeight: '100vh' }}>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={setCollapsed}
-          style={{
-            height: '100vh', // Full height
-            position: 'fixed', // Fix it in place
-            top: 0, // Align to top
-            left: 0, // Align to the left side of the viewport
-            overflowY: 'auto', // Make the content scrollable
-            width: collapsed ? 80 : 200, // Change width based on collapsed state
-            zIndex: 100, // Ensure sidebar stays on top
-          }}
-        >
-          <div className="logo" style={{ color: 'white', margin: '16px', textAlign: 'center' }}>
-            {collapsed ? 'AD' : 'Admin Portal'}
-          </div>
-          <Menu
-            theme="dark"
-            mode="inline"
-            selectedKeys={[location.pathname]}
-            onClick={handleMenuClick}
-            items={menuItems.map((item) => ({
-              key: item.key,
-              icon: item.icon,
-              label: item.label,
-            }))}
-          />
-        </Sider>
+        {!isMobile ? (
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={setCollapsed}
+            style={{
+              height: '100vh',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              overflowY: 'auto',
+              width: collapsed ? 80 : 200,
+              zIndex: 100,
+            }}
+          >
+            <div className="logo" style={{ color: 'white', margin: '16px', textAlign: 'center' }}>
+              {collapsed ? 'AD' : 'Admin Portal'}
+            </div>
+            <Menu
+              theme="dark"
+              mode="inline"
+              selectedKeys={[location.pathname]}
+              onClick={(e) => {
+                handleMenuClick(e);
+                // on mobile we'd close drawer; desktop unaffected
+                if (isMobile) setDrawerVisible(false);
+              }}
+              items={menuItems.map((item) => ({
+                key: item.key,
+                icon: item.icon,
+                label: item.label,
+              }))}
+            />
+          </Sider>
+        ) : (
+          <Drawer
+            title={<div style={{ color: '#fff', fontWeight: 600 }}>Admin Portal</div>}
+            placement="left"
+            onClose={() => setDrawerVisible(false)}
+            open={drawerVisible}
+            width={Math.min(360, Math.round(window.innerWidth * 0.85))}
+            bodyStyle={{ padding: 0, background: '#001529', height: '100%' }}
+            headerStyle={{ background: '#001529', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            maskClosable
+            maskStyle={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+            zIndex={1200}
+            closeIcon={<span style={{ color: '#fff' }}>✕</span>}
+          >
+            <div style={{ paddingTop: 8 }}>
+              <div style={{ color: '#fff', padding: '12px 16px', fontSize: 18, fontWeight: 700 }}>
+                Admin
+              </div>
+              <Menu
+                theme="dark"
+                mode="inline"
+                style={{ background: 'transparent', borderRight: 'none' }}
+                selectedKeys={[location.pathname]}
+                onClick={(e) => {
+                  handleMenuClick(e);
+                  setDrawerVisible(false);
+                }}
+                items={menuItems.map((item) => ({
+                  key: item.key,
+                  icon: item.icon,
+                  label: item.label,
+                }))}
+              />
+            </div>
+          </Drawer>
+        )}
 
-        <Layout className="site-layout" style={{ marginLeft: collapsed ? 80 : 200 }}>
+        <Layout
+          className="site-layout"
+          style={{ marginLeft: isMobile ? 0 : collapsed ? 80 : 200 }}
+        >
           {/* Adding marginLeft to offset the fixed sidebar */}
           <Header
             style={{
@@ -78,7 +139,7 @@ const DashboardLayout = () => {
             }}
           >
             <Button type="text" onClick={toggle}>
-              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              {isMobile ? <MenuUnfoldOutlined /> : collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             </Button>
             <Button type="primary" icon={<LogoutOutlined />} onClick={logout}>
               Logout

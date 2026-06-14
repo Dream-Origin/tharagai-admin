@@ -30,6 +30,18 @@ body {
   min-height: 100vh;
 }
 
+/* Mobile adjustments: stop centering, allow full-width layout */
+@media (max-width: 767px) {
+  body {
+    display: block;
+    padding: 0;
+    min-width: 0;
+  }
+  .site-layout {
+    margin-left: 0 !important;
+  }
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;

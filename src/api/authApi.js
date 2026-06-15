@@ -1,5 +1,5 @@
-const API_BASE_URL = "https://tharagai-api.onrender.com";
-// const API_BASE_URL = "http://localhost:3001";
+import { CONFIG } from "../config";
+const { API_BASE_URL } = CONFIG;
 
 
 async function parseResponse(res) {

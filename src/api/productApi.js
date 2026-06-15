@@ -1,14 +1,14 @@
-const API_BASE_URL = "https://tharagai-api.onrender.com";
-// const API_BASE_URL = "http://localhost:3000/products";
+import { CONFIG } from "../config";
+const { API_BASE_URL, PRODUCTS_API } = CONFIG;
 
 export async function fetchProducts() {
-  const res = await fetch(`${API_BASE_URL}/products`);
+  const res = await fetch(`${API_BASE_URL}${PRODUCTS_API}`);
   if (!res.ok) throw new Error("Failed to fetch products");
   return await res.json();
 }
 
 export async function saveProduct(product) {
-  const res = await fetch(`${API_BASE_URL}/products`, {
+  const res = await fetch(`${API_BASE_URL}${PRODUCTS_API}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(product),
@@ -21,7 +21,7 @@ export async function saveProduct(product) {
 }
 
 export async function updateProduct(product) {
-  const res = await fetch(`${API_BASE_URL}/products/${product._id}`, {
+  const res = await fetch(`${API_BASE_URL}${PRODUCTS_API}/${product._id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(product),
@@ -34,7 +34,7 @@ export async function updateProduct(product) {
 }
 
 export async function deleteProduct(productId) {
-  const res = await fetch(`${API_BASE_URL}/products/${productId}`, {
+  const res = await fetch(`${API_BASE_URL}${PRODUCTS_API}/${productId}`, {
     method: "DELETE",
   });
   if (!res.ok) {
@@ -44,7 +44,7 @@ export async function deleteProduct(productId) {
 }
 
 export async function bulkDeleteProducts(ids) {
-  const res = await fetch(`${API_BASE_URL}/products/bulk`, {
+  const res = await fetch(`${API_BASE_URL}${PRODUCTS_API}/bulk`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids }),

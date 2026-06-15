@@ -1,11 +1,11 @@
-// const API_BASE_URL = "http://localhost:3001/orders";
-const API_BASE_URL = "https://tharagai-api.onrender.com/orders";
+import { CONFIG } from "../config";
+const { API_BASE_URL, ORDERS_API } = CONFIG;
 
 /* ================================
       GET ALL ORDERS
 ================================ */
 export async function fetchOrders() {
-    const res = await fetch(API_BASE_URL);
+    const res = await fetch(`${API_BASE_URL}${ORDERS_API}`);
     if (!res.ok) throw new Error("Failed to fetch orders");
     return await res.json();
 }
@@ -14,7 +14,7 @@ export async function fetchOrders() {
       CREATE ORDER
 ================================ */
 export async function createOrder(orderData) {
-    const res = await fetch(API_BASE_URL, {
+    const res = await fetch(`${API_BASE_URL}${ORDERS_API}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
@@ -33,7 +33,7 @@ export async function createOrder(orderData) {
       GET ORDER BY ID
 ================================ */
 export async function fetchOrderById(orderId) {
-    const res = await fetch(`${API_BASE_URL}/${orderId}`);
+    const res = await fetch(`${API_BASE_URL}${ORDERS_API}/${orderId}`);
     if (!res.ok) throw new Error("Order not found");
     return await res.json();
 }
@@ -44,7 +44,7 @@ export async function fetchOrderById(orderId) {
       /orders/user/search?mobile=...
 ================================ */
 export async function searchOrders({ email, mobile }) {
-    let url = `${API_BASE_URL}/user/search?`;
+    let url = `${API_BASE_URL}${ORDERS_API}/user/search?`;
 
     if (email) url += `email=${email}`;
     if (mobile) url += `mobile=${mobile}`;
@@ -61,7 +61,7 @@ export async function searchOrders({ email, mobile }) {
       PUT /orders/:id/status
 ================================ */
 export async function updateOrderStatus(orderId, status, paymentId = null) {
-    const res = await fetch(`${API_BASE_URL}/${orderId}/status`, {
+    const res = await fetch(`${API_BASE_URL}${ORDERS_API}/${orderId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, paymentId }),
@@ -80,7 +80,7 @@ export async function updateOrderStatus(orderId, status, paymentId = null) {
       DELETE ORDER
 ================================ */
 export async function deleteOrder(orderId) {
-    const res = await fetch(`${API_BASE_URL}/${orderId}`, {
+    const res = await fetch(`${API_BASE_URL}${ORDERS_API}/${orderId}`, {
         method: "DELETE",
     });
 

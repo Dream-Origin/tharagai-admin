@@ -102,8 +102,8 @@ export default function ProductsPage() {
     try {
       const data = await fetchProducts();
       setProducts(Array.isArray(data) ? data : []);
-      const lastId = data.at(-1)?.productId;
-      setProductId(getProductId(lastId));
+      // Generate next productId based on the full product list to avoid duplicates
+      setProductId(getProductId(data));
     } catch (err) {
       console.error(err);
     } finally {
